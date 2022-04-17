@@ -30,7 +30,41 @@ public class NumberFinderImpl implements NumberFinder {
 
     @Override
     public boolean contains(int valueToFind, List<CustomNumberEntity> list) {
-        List<CustomNumberEntity> filteredAndSorted = getSortedAndNumericList(list);
+        if (list.isEmpty()) return false;
+
+        return list.stream()
+                .parallel()
+                .filter(e -> NumberUtils.isCreatable(e.getNumber()))
+                .filter(e -> comparator.compare(valueToFind, e) == 0)
+                .findAny()
+                .isPresent();
+    }
+
+    // filePath is the classpath for the json file, like data/sample.json
+    @Override
+    public List<CustomNumberEntity> readFromFile(String filePath) {
+        List<CustomNumberEntity> result = new ArrayList<>();
+        try {
+            URL resource = getClass().getClassLoader().getResource(filePath);
+            if (nonNull(resource)) {
+                File file = new File(resource.toURI());
+                result = objectMapper
+                        .readValue(file, new TypeReference<List<CustomNumberEntity>>(){});
+            }
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    // sort by ascending order O(n log(n)) Quicksort
+    public List<CustomNumberEntity> getSortedNumericList(List<CustomNumberEntity> list) {
+        return list.stream().filter(e -> NumberUtils.isCreatable(e.getNumber()))
+                .sorted((e1, e2) -> comparator.compare(NumberUtils.createInteger(e1.getNumber()), e2))
+                .collect(Collectors.toList());
+    }
+
+    public boolean containsByBinarySearch(int valueToFind, List<CustomNumberEntity> filteredAndSorted) {
         if (filteredAndSorted.isEmpty()) return false;
 
         int L =0;
@@ -52,27 +86,4 @@ public class NumberFinderImpl implements NumberFinder {
         return false;
     }
 
-    // filePath is the classpath for the json file, like data/sample.json
-    @Override
-    public List<CustomNumberEntity> readFromFile(String filePath) {
-        List<CustomNumberEntity> result = new ArrayList<>();
-        try {
-            URL resource = getClass().getClassLoader().getResource(filePath);
-            if (nonNull(resource)) {
-                File file = new File(resource.toURI());
-                result = objectMapper
-                        .readValue(file, new TypeReference<List<CustomNumberEntity>>(){});
-            }
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    // sort by ascending order O(n log(n)) Quicksort
-    public List<CustomNumberEntity> getSortedAndNumericList(List<CustomNumberEntity> list) {
-        return list.stream().filter(e -> NumberUtils.isCreatable(e.getNumber()))
-                .sorted((e1, e2) -> comparator.compare(NumberUtils.createInteger(e1.getNumber()), e2))
-                .collect(Collectors.toList());
-    }
 }

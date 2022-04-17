@@ -23,17 +23,11 @@ public class NumberFinderImplTests {
     }
 
     @Test
-    public void testGetSortedAndNumericList_shouldGetSortedAndFilteredResult() {
-        List<CustomNumberEntity> result = numberFinder.getSortedAndNumericList(numberFinder.readFromFile("data/sample.json"));
-        System.out.println(result);
-    }
-
-    @Test
     public void testContains_shouldReturnTrue() {
         int valueToFind = 100;
         String filePath = "data/sample.json";
 
-        List<CustomNumberEntity> toTest = numberFinder.getSortedAndNumericList(numberFinder.readFromFile(filePath));
+        List<CustomNumberEntity> toTest = numberFinder.readFromFile(filePath);
         assertTrue(numberFinder.contains(valueToFind, toTest) == true);
     }
 
@@ -42,7 +36,27 @@ public class NumberFinderImplTests {
         int valueToFind = 10;
         String filePath = "data/sample.json";
 
-        List<CustomNumberEntity> toTest = numberFinder.getSortedAndNumericList(numberFinder.readFromFile(filePath));
+        List<CustomNumberEntity> toTest = numberFinder.readFromFile(filePath);
         assertTrue(numberFinder.contains(valueToFind, toTest) == false);
     }
+
+    @Test
+    public void testContainsByBinarySearch_shouldReturnTrue() {
+        int valueToFind = 100;
+        String filePath = "data/sample.json";
+
+        List<CustomNumberEntity> toTest = numberFinder.getSortedNumericList(numberFinder.readFromFile(filePath));
+        assertTrue(numberFinder.containsByBinarySearch(valueToFind, toTest) == true);
+    }
+
+    @Test
+    public void testContainsByBinarySearch_shouldReturnFalse() {
+        int valueToFind = 10;
+        String filePath = "data/sample.json";
+
+        List<CustomNumberEntity> toTest = numberFinder.getSortedNumericList(numberFinder.readFromFile(filePath));
+        assertTrue(numberFinder.containsByBinarySearch(valueToFind, toTest) == false);
+    }
+
+
 }
